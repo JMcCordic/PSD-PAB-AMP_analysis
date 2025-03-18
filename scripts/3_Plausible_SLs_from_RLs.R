@@ -37,9 +37,9 @@ calib_data <- subset(calib_data_og, calib_data_og$used==1)
 # Transmission loss model -------------------------------------------------
 
 # Use nonlinear least squares regression to model transmission loss function
-tl_model <- nls(PeakLev ~ SL - loss_geo*log10(Distance) + loss_abs*Distance, 
+tl_model <- nls(PeakLev ~ SL - loss_geo*log10(Distance) - loss_abs*Distance, 
                 algorithm = "port",
-                upper = c(200, 20, 0.001),
+                upper = c(200, 20, 0.1),
                 lower = c(0, 0, 0),
                 data = calib_data,
                 start = list(SL = 0,
@@ -51,7 +51,7 @@ summary(tl_model)
 # TL equation params - change each time ***make dialog box?***
 SL <- round(coef(tl_model)[1], digits = 2)
 loss_geo <- round(coef(tl_model)[2], digits = 2)
-loss_abs <- round(coef(tl_model)[3], digits = 2)
+loss_abs <- round(coef(tl_model)[3], digits = 3)
 
 
 # plot Peak Level as function of distance
