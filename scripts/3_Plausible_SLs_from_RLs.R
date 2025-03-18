@@ -25,11 +25,11 @@ dep_id <- dlgInput(message = "Site name, deployment")$res
 
 #### Load data ####
 # load in data table with reviewed peak freq/ peak levs for unknown vessels
-data_og <- read.xlsx(tk_choose.files(caption=paste0("Select the file with unknown vessels peak RLs: ", dep_id)))
+data_og <- read_csv(tk_choose.files(caption=paste0("Select the file with unknown vessels peak RLs: ", dep_id)))
 data <- subset(data_og, data_og$used==1)
 
 # Load reviewed PF/distance table from calibration vessel
-calib_data_og <- read.xlsx(tk_choose.files(caption=paste0("Select the file with calibration track RLs: ", dep_id)))
+calib_data_og <- read_csv(tk_choose.files(caption=paste0("Select the file with calibration track RLs: ", dep_id)))
 calib_data <- subset(calib_data_og, calib_data_og$used==1)
 
 
