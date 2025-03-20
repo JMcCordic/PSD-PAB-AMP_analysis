@@ -19,9 +19,9 @@ source("scripts/AMP_pkgs_funs.R")
 
 # --> LATER TO-DO: restructure this to accommodate multiple deployments per park?
 
-#### Deployment name ####
+#### Deployment info ####
 dep_id <- dlgInput(message = "Site name, deployment")$res
-
+depth_m <- as.numeric(dlgInput(message = "Hydrophone depth in meters")$res)
 
 #### Load data ####
 # load in data table with reviewed peak freq/ peak levs for unknown vessels
@@ -30,14 +30,14 @@ data <- subset(data_og, data_og$used==1)
 
 # Load reviewed PF/distance table from calibration vessel
 calib_data_og <- read_csv(tk_choose.files(caption=paste0("Select the file with calibration track RLs: ", dep_id)))
-calib_data <- subset(calib_data_og, calib_data_og$used==1)
-
-
+calib_data <- subset(calib_data_og, calib_data_og$used==1) |>
+  mutate(Distance_km = Distance/1000,
+         slant_range_m = sqrt(Distance^2 + depth_m^2))
 
 # Transmission loss model -------------------------------------------------
 
 # Use nonlinear least squares regression to model transmission loss function
-tl_model <- nls(PeakLev ~ SL - loss_geo*log10(Distance) - loss_abs*Distance, 
+tl_model <- nls(PeakLev ~ SL - loss_geo*log10(slant_range_m) - loss_abs*slant_range_m, 
                 algorithm = "port",
                 upper = c(200, 20, 0.1),
                 lower = c(0, 0, 0),
