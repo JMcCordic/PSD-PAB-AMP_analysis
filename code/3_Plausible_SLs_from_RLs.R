@@ -4,7 +4,7 @@ library(openxlsx)
 library(svDialogs)
 library(tcltk2)
 
-source("scripts/AMP_pkgs_funs.R")
+source("code/AMP_pkgs_funs.R")
 
 
 
@@ -31,6 +31,7 @@ data <- subset(data_og, data_og$used==1)
 # Load reviewed PF/distance table from calibration vessel
 calib_data_og <- read_csv(tk_choose.files(caption=paste0("Select the file with calibration track RLs: ", dep_id)))
 calib_data <- subset(calib_data_og, calib_data_og$used==1) |>
+  # filter(PeakFreq > 178 & PeakFreq < 282)|>
   mutate(Distance_km = Distance/1000,
          slant_range_m = sqrt(Distance^2 + depth_m^2))
 
@@ -63,19 +64,20 @@ tl_label <- paste0("RL = ", SL, " - ",
 
 ggplot(data = calib_data, 
        aes(x = Distance, 
-           y = PeakLev, color = PeakFreq)) +
-  geom_point() + 
+           y = PeakLev)) +
+  geom_point(aes(color = PeakFreq)) + 
   scale_color_viridis_c()+
   stat_smooth(method = "nls", 
-              formula = y ~ a - b*log10(x) + c*x,
+              formula = y ~ a - b*log10(x) - c*x,
               se = FALSE,
               method.args = list(start = c(a = 150,
                                               b = 15,
                                               c = 0),
                                  algorithm = "port",
-                                 upper = c(200, 20, 0.001),
+                                 upper = c(200, 20, 0.1),
                                  lower = c(0, 0, 0)
-                                 )
+                                 ),
+              fullrange = TRUE
               ) +
   annotate("text", x = 300, y = 110, label = tl_label)+
   labs(x = "Distance (m)", y = expression(paste("Peak Level, dB re 1", mu, "Pa")))+
