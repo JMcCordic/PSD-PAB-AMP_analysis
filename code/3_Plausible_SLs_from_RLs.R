@@ -40,7 +40,7 @@ calib_data <- subset(calib_data_og, calib_data_og$used==1) |>
 # Use nonlinear least squares regression to model transmission loss function
 tl_model <- nls(PeakLev ~ SL - loss_geo*log10(slant_range_m) - loss_abs*slant_range_m, 
                 algorithm = "port",
-                upper = c(200, 20, 0.1),
+                upper = c(200, 30, 0.1),
                 lower = c(0, 0, 0),
                 data = calib_data,
                 start = list(SL = 0,
