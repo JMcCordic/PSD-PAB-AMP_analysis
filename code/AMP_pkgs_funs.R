@@ -174,3 +174,234 @@ inside_tables_to_hp <- function(ins_table,
   
   return = hourly_pres
 }
+
+# Taiki's stuff down here ####
+library(lubridate)
+library(readxl)
+library(dplyr)
+library(signal)
+
+tryPm <- try(packageVersion('PAMmisc') >= '1.12.5', silent=TRUE)
+if(!isTRUE(tryPm)) {
+  pak::pkg_install('TaikiSan21/PAMmisc')
+}
+library(PAMmisc)
+
+# x is either a POSIXct time or a wav file name
+# tz is the actual timezone of these 
+# result will be recast to UTC
+#
+tzAdjuster <- function(x, tz) {
+  # step 1 convert files as if UTC time
+  if(is.character(x)) {
+    x <- fileToTime(x)
+  }
+  # special handling for UTC+-X style timezone (these are non-standard)
+  if(grepl('UTC[\\+\\-][0-9]{1,2}', tz)) {
+    tz <- gsub('UTC', '', tz)
+    sign <- substr(tz, start=1, stop=1)
+    nums <- as.numeric(substr(tz, start=2, stop=nchar(tz)))
+    tz <- 'UTC'
+  } else {
+    sign <- '+'
+    nums <- 0
+  }
+  # for proper Olson TZ's, need to force it then re-convert to UTC
+  if(tz %in% OlsonNames()) {
+    x <- force_tz(x, tzone=tz)
+    x <- with_tz(x, tzone='UTC')
+  }
+  if(nums != 0) {
+    x <- switch(sign,
+                '+' = {
+                  x - 3600 * nums
+                },
+                '-' = {
+                  x + 3600 * nums
+                }
+    )
+  }
+  x
+}
+
+# Helper function to parse various styles of wav file names to times
+# x is name of wav file (or many)
+# result is POSIXct time in UTC
+#
+fileToTime <- function(x) {
+  if(length(x) > 1) {
+    result <- lapply(x, fileToTime)
+    result <- as.POSIXct(unlist(result), origin='1970-01-01 00:00:00', tz='UTC')
+    return(result)
+  }
+  x <- basename(x)
+  x <- tools::file_path_sans_ext(x)
+  format <- c('pamguard', 'pampal', 'soundtrap', 'sm3', 'icListens1', 'icListens2', 'AMAR')
+  for(f in format) {
+    switch(
+      f,
+      'pamguard' = {
+        date <- gsub('.*([0-9]{8}_[0-9]{6}_[0-9]{3})$', '\\1', x)
+        posix <- as.POSIXct(substr(date, 1, 15), tz = 'UTC', format = '%Y%m%d_%H%M%S')
+        if(is.na(posix)) next
+        millis <- as.numeric(substr(date, 17, 19)) / 1e3
+        if(!is.na(posix)) {
+          break
+        }
+      },
+      'pampal' = {
+        date <- gsub('.*([0-9]{14}_[0-9]{3})$', '\\1', x)
+        posix <- as.POSIXct(substr(date, 1, 14), tz = 'UTC', format = '%Y%m%d%H%M%S')
+        if(is.na(posix)) next
+        millis <- as.numeric(substr(date, 16, 18)) / 1e3
+        if(!is.na(posix)) {
+          break
+        }
+      },
+      'soundtrap' = {
+        date <- gsub('.*\\.([0-9]{12})$', '\\1', x)
+        posix <- as.POSIXct(date, format = '%y%m%d%H%M%S', tz='UTC')
+        millis <- 0
+        if(!is.na(posix)) {
+          break
+        }
+      },
+      'sm3' = {
+        date <- gsub('.*\\_([0-9]{8}_[0-9]{6})Z?$', '\\1', x)
+        posix <- as.POSIXct(date, format = '%Y%m%d_%H%M%S', tz='UTC')
+        millis <- 0
+        if(!is.na(posix)) {
+          break
+        }
+      },
+      'icListens1' = {
+        date <- gsub('.*_([0-9]{8}-[0-9]{6})$', '\\1', x)
+        posix <- as.POSIXct(date, format = '%Y%m%d-%H%M%S', tz='UTC')
+        millis <- 0
+        if(!is.na(posix)) {
+          break
+        }
+      },
+      'icListens2' = {
+        date <- gsub('.*_([0-9]{6}-[0-9]{6})$', '\\1', x)
+        posix <- as.POSIXct(date, format = '%y%m%d-%H%M%S', tz='UTC')
+        millis <- 0
+        if(!is.na(posix)) {
+          break
+        }
+      },
+      'AMAR' = {
+        # 'AMAR668.9.20210823T231318Z.wav' example
+        date <- gsub('.*([0-9]{8}T[0-9]{6}Z)$', '\\1', x)
+        posix <- as.POSIXct(date, format='%Y%m%dT%H%M%SZ', tz='UTC')
+        millis <- 0
+        if(!is.na(posix)) {
+          break
+        }
+      }
+    )
+  }
+  posix + millis
+}
+
+# clarify which should be chooser options
+arcToRaven <- function(arc=NULL, wav=NULL, wavTz='UTC', gpsTz='UTC', freq=250, duration=5, file=NULL) {
+  if(is.character(arc)) {
+    arc <- read_excel(arc)
+  }
+  arc$UTC <- as.POSIXct(arc$DateTimeS, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
+  arc$UTC <- tzAdjuster(arc$UTC, tz=gpsTz)
+  wavTime <- tzAdjuster(wav, tz=wavTz)
+  freq <- as.integer(freq)
+  arc$OBJECTID <- as.integer(arc$OBJECTID)
+  beginTime <-  as.numeric(difftime(arc$UTC, wavTime, units='secs'))
+  if(any(beginTime < 0)) {
+    stop('Some start times are negative, likely that timezone is incorrect')
+  }
+  result <- data.frame(
+    Selection = arc$OBJECTID,
+    View='Spectrogram',
+    Channel=1L,
+    'Begin Time (s)' = beginTime,
+    'End Time (s)' = beginTime + duration,
+    'Low Freq (Hz)' = freq,
+    'High Freq (Hz)' = freq,
+    'Begin Date' = NA,
+    'Begin Clock Time' = NA,
+    'End Clock Time' = NA,
+    'Delta Time (s)' = NA,
+    'Distance (m)' = arc$NEAR_DIST,
+    FID_2 = arc$OBJECTID,
+    Site = arc$Comment,
+    Lat = arc$Latitude,
+    Long = arc$Longitude,
+    Segment = arc$Descript,
+    check.names=FALSE
+  )
+  if(!is.null(file)) {
+    write.table(result, file=file, sep='\t', row.names=FALSE, quote=FALSE)
+  }
+  result
+}
+
+# dir is wav files
+# calibration is large negative number
+# freqMin/Max are allowed peak ranges
+calculatePeakLev <- function(dir, cal=NULL, freqMin=NULL, freqMax=NULL, progress=TRUE, file=NULL) {
+  wavFiles <- list.files(dir, full.names=TRUE, pattern='\\.wav$')
+  WINDOW <- numeric(0)
+  if(progress) {
+    pb <- txtProgressBar(min=0, max=length(wavFiles), style=3)
+    ix <- 0
+  }
+  result <- lapply(wavFiles, function(x) {
+    data <- fastReadWave(x)[1,]
+    data <- data - mean(data)
+    data <- data #* 10^(-cal/20)
+    sr <- attr(data, 'rate')
+    if(length(WINDOW) < sr) {
+      WINDOW <<- signal::hanning(sr)
+    }
+    if(is.null(freqMin)) {
+      freqMin <<- 0
+    }
+    if(is.null(freqMax)) {
+      freqMax <<- sr/2
+    }
+    nfft <- sr
+    noverlap <- round(sr / 2)
+    rms <- 20*log10(sqrt(mean(data^2))) - cal #believe this is correct cal
+    hop <- nfft - noverlap
+    welch <- pwelch(data, nfft=nfft, noverlap=noverlap, sr=sr, window=WINDOW, demean='long')
+    peakLev <- max(abs(welch$spec[welch$freq >= freqMin & welch$freq <= freqMax]))
+    peakFreq <- welch$freq[abs(welch$spec) == peakLev]
+    peakLev <- 10*log10(peakLev)- cal
+    result <- list(PeakFreq=peakFreq, PeakLev=peakLev, RMS=rms, Filename=basename(x))
+    splitName <- strsplit(basename(x), '_')[[1]]
+    
+    if(length(splitName) != 3) {
+      distance <- NA
+    } else {
+      distPart <- splitName[3]
+      distPart <- gsub('\\.wav$', '', distPart)
+      distance <- suppressWarnings(as.numeric(distPart))
+    }
+    result$Distance <- distance
+    if(progress) {
+      ix <<- ix + 1
+      setTxtProgressBar(pb, value=ix)
+    }
+    result
+  })
+  result <- bind_rows(result)
+  result$Calibration <- cal
+  result$FreqMin <- freqMin
+  result$FreqMax <- freqMax
+  if(!is.null(file)) {
+    if(!grepl('csv$', file)) {
+      file <- paste0(file, '.csv')
+    }
+    write.csv(result, file=file, row.names=FALSE)
+  }
+  result
+}

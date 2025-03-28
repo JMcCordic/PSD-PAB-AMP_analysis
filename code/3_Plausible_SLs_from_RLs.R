@@ -4,7 +4,7 @@ library(openxlsx)
 library(svDialogs)
 library(tcltk2)
 
-source("scripts/AMP_pkgs_funs.R")
+source("code/AMP_pkgs_funs.R")
 
 
 
