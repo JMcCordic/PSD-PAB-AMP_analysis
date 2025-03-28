@@ -28,7 +28,7 @@ end_dep_date <- as_date(dlg_input(message = "End date: YYYY-MM-DD")$res)
 #############################################################
 
 #### source helper file w/functions
-source("scripts/AMP_pkgs_funs.R")
+source("code/AMP_pkgs_funs.R")
 
 #### Compile Vessel Selections from Raven ####
 all_selns <- Compile_Raven_selns(site_id = site_id, 

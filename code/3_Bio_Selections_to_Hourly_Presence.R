@@ -26,7 +26,7 @@ end_dep_date <- as_date("2020-11-04")
 #############################################################
 
 #### source helper file w/functions
-source("scripts/AMP_pkgs_funs.R")
+source("code/AMP_pkgs_funs.R")
 
 #### Compile Biology Selections from Raven ####
 all_bio_selns <- Compile_Raven_bio_selns(site_id = site_id, 

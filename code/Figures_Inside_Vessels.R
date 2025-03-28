@@ -20,7 +20,7 @@ library(tcltk2)
 #############################################################
 
 #### source helper file w/functions
-source("scripts/AMP_pkgs_funs.R")
+source("code/AMP_pkgs_funs.R")
 
 
 
