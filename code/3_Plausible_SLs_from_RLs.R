@@ -354,7 +354,7 @@ selns_data <- selns_og |>
 
 
 highprob_ins_small <- data |>
-  filter(pins_sm >= 0.75) |>
+  dplyr::filter(pins_sm >= 0.75) |>
   mutate(begin_file_date = ymd(str_sub(Date, 1,6)),
          seln_num = as.numeric(gsub(pattern = "S", replacement = "", x = Selection)))|>
   left_join(selns_data, 
@@ -362,10 +362,10 @@ highprob_ins_small <- data |>
                    "begin_file_date" = "Begin_file_date"))
 
 highprob_ins_smmed <- highprob_ins_small |>
-  filter(pins_ovrll >= 0.75)
+  dplyr::filter(pins_ovrll >= 0.75)
   
-write_csv(highprob_ins_small, paste0("outputs/", dep_id, "HighProb_Ins_Small.csv"))
-write_csv(highprob_ins_smmed, paste0("outputs/", dep_id, "HighProb_Ins_SmallMed.csv"))
+write_csv(highprob_ins_small, paste0("output/", dep_id, "HighProb_Ins_Small.csv"))
+write_csv(highprob_ins_smmed, paste0("output/", dep_id, "HighProb_Ins_SmallMed.csv"))
 
   
 
