@@ -156,42 +156,42 @@ data_sl <- as.data.frame(data_sl)
 rownames(data_sl) <- data$Filename
 
 
-# Range plots -------------------------------------------------------------
-
-
-# make tricolor plausible SL plots per vessel
-data_plot <- as.data.frame(t(data_sl))
-data_plot$distance <- prange
-
-#make list to save plots
-plot_list <- list()
-
-#create plots
-for (j in 1:nrow(data)){
-  sl_plot <- ggplot(data_plot, aes(x=distance, y = data_plot[,j]))+
-    geom_rect(xmin=0, xmax=max(data_plot$distance), ymin=125, ymax = 150, fill="skyblue")+
-    geom_rect(xmin=0, xmax=max(data_plot$distance), ymin=150, ymax = 170, fill="cadetblue2")+
-    geom_rect(xmin=0, xmax=max(data_plot$distance), ymin=170, ymax = 180, fill="deepskyblue4")+
-    geom_point()+
-    geom_vline(aes(xintercept=park_dist))+
-    ylim(125,180)+
-    ylab("SL")+
-    xlab("Distance (m)")+
-    ggtitle(paste0("Plausible SLs: ",str_sub(data$Filename[j], 11,-5),", ",as.character(data$Behav[j])))
-  
-  plot_list[[j]] <- sl_plot
-  
-}
-
-# save plots
-
-fol_name <- tk_choose.dir("Select folder to save range figures")
-for(j in 1:nrow(data)){
-  file_name <- paste0(fol_name,"/","SL_vs_dist_", str_sub(data$Filename[j], 6,-5),"_",as.character(data$Behav[j]),".png")
-  png(file_name, width=5, height=5,units="in", res = 300)
-  print(plot_list[[j]])
-  dev.off()
-}
+# # Range plots -------------------------------------------------------------
+# 
+# 
+# # make tricolor plausible SL plots per vessel
+# data_plot <- as.data.frame(t(data_sl))
+# data_plot$distance <- prange
+# 
+# #make list to save plots
+# plot_list <- list()
+# 
+# #create plots
+# for (j in 1:nrow(data)){
+#   sl_plot <- ggplot(data_plot, aes(x=distance, y = data_plot[,j]))+
+#     geom_rect(xmin=0, xmax=max(data_plot$distance), ymin=125, ymax = 150, fill="skyblue")+
+#     geom_rect(xmin=0, xmax=max(data_plot$distance), ymin=150, ymax = 170, fill="cadetblue2")+
+#     geom_rect(xmin=0, xmax=max(data_plot$distance), ymin=170, ymax = 180, fill="deepskyblue4")+
+#     geom_point()+
+#     geom_vline(aes(xintercept=park_dist))+
+#     ylim(125,180)+
+#     ylab("SL")+
+#     xlab("Distance (m)")+
+#     ggtitle(paste0("Plausible SLs: ",str_sub(data$Filename[j], 11,-5),", ",as.character(data$Behav[j])))
+#   
+#   plot_list[[j]] <- sl_plot
+#   
+# }
+# 
+# # save plots
+# 
+# fol_name <- tk_choose.dir("Select folder to save range figures")
+# for(j in 1:nrow(data)){
+#   file_name <- paste0(fol_name,"/","SL_vs_dist_", str_sub(data$Filename[j], 6,-5),"_",as.character(data$Behav[j]),".png")
+#   png(file_name, width=5, height=5,units="in", res = 300)
+#   print(plot_list[[j]])
+#   dev.off()
+# }
 
 
 # Inside park probs -------------------------------------------------------
