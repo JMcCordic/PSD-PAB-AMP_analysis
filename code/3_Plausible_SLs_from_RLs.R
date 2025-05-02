@@ -83,7 +83,7 @@ ggplot(data = calib_data,
   labs(x = "Distance (m)", y = expression(paste("Peak Level, dB re 1", mu, "Pa")))+
   theme_bw(base_size = 14)
 
-ggsave(ggsave(paste0("outputs/", dep_id,"TL_model.png"), width=8, height=8,
+ggsave(ggsave(paste0("output/", dep_id,"TL_model.png"), width=8, height=8,
               units="in", dpi=300))
 
 
