@@ -24,6 +24,7 @@ dep_id <- dlgInput(message = "Site name, deployment")$res
 depth_m <- as.numeric(dlgInput(message = "Hydrophone depth in meters")$res)
 
 #### Load data ####
+
 # load in data table with reviewed peak freq/ peak levs for unknown vessels
 data_og <- read_csv(tk_choose.files(caption=paste0("Select the file with unknown vessels peak RLs: ", dep_id)))
 data <- subset(data_og, data_og$used==1)
@@ -89,6 +90,13 @@ ggsave(ggsave(paste0("output/", dep_id,"TL_model.png"), width=8, height=8,
 
 
 
+
+
+
+# Calculate detection range and plausible SLs -----------------------------------------------
+
+
+
 # average distance between ST and park boundary
 park_dist <- as.numeric(dlgInput(message = paste0("Avg meters to park boundary (whole number): ", dep_id))$res)
 
@@ -98,8 +106,6 @@ tol_data <- read.csv(tk_choose.files(caption=paste0("Select TOL output: ",dep_id
 
 
 
-
-# Calculate detection range -----------------------------------------------
 
 # get quantiles for TOL with median peak frequency
 
