@@ -309,7 +309,14 @@ arcToRaven <- function(arc=NULL, wav=NULL, wavTz='UTC', gpsTz='UTC', freq=250, d
   if(is.character(arc)) {
     arc <- read_excel(arc)
   }
-  arc$UTC <- as.POSIXct(arc$DateTimeS, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
+  if('DateTimeS' %in% names(arc)) {
+    arc$UTC <- as.POSIXct(arc$DateTimeS, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
+  } else if(all(c('Date', 'Time') %in% names(arc))) {
+    arc$UTC <- as.POSIXct(paste0(arc$Date, '_', arc$Time), 
+                          format='%y%m%d_%H:%M:%S', tz='UTC')
+  } else {
+    stop('Column "DateTimeS" or columns "Date" and "Time" are not present')
+  }
   arc$UTC <- tzAdjuster(arc$UTC, tz=gpsTz)
   wavTime <- tzAdjuster(wav, tz=wavTz)
   freq <- as.integer(freq)
