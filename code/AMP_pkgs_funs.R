@@ -305,7 +305,7 @@ fileToTime <- function(x) {
 }
 
 # clarify which should be chooser options
-arcToRaven <- function(arc=NULL, wav=NULL, wavTz='UTC', gpsTz='UTC', freq=250, duration=5, file=NULL) {
+arcToRaven <- function(arc=NULL, wav=NULL, wavTz='UTC', gpsTz='UTC', freq=250, duration=5, file=NULL, maxPoints=20) {
   if(is.character(arc)) {
     arc <- read_excel(arc)
   }
@@ -339,12 +339,34 @@ arcToRaven <- function(arc=NULL, wav=NULL, wavTz='UTC', gpsTz='UTC', freq=250, d
     'Delta Time (s)' = NA,
     'Distance (m)' = arc$NEAR_DIST,
     FID_2 = arc$OBJECTID,
-    Site = arc$Comment,
+    # Site = arc$Comment,
     Lat = arc$Latitude,
     Long = arc$Longitude,
-    Segment = arc$Descript,
+    # Segment = arc$Descript,
     check.names=FALSE
   )
+  if('Comment' %in% names(arc)) {
+    result$Site <- arc$Comment
+  }
+  if('Segment' %in% names(arc)) {
+    result$Segment <- arc$Segment
+  } else if('Descript' %in% names(arc)) {
+    result$Segment <- arc$Descript
+  }
+  if('Segment' %in% names(result)) {
+    result <- bind_rows(lapply(split(result, result$Segment), function(x) {
+      if(nrow(x) < maxPoints) {
+        warning('Segment ', x$Segment[1], ' had less than ', maxPoints,
+                ' data points', call.=FALSE)
+        keepSeq <- seq_len(nrow(x))
+      } else {
+        keepSeq <- seq(from=1, to=nrow(x), length.out=maxPoints)
+      }
+      x[keepSeq, ]
+    }))
+  } else {
+    warning('"Segment" column not found in Arc data')
+  }
   if(!is.null(file)) {
     write.table(result, file=file, sep='\t', row.names=FALSE, quote=FALSE)
   }
