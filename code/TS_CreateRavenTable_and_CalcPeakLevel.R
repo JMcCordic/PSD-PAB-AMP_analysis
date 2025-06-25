@@ -21,6 +21,7 @@ ravFromArc <- arcToRaven(arc=arcFile,
                          wav=wavFile, 
                          wavTz=wavTimezone, 
                          gpsTz=gpsTimezone,
+                         maxPoints = 20,
                          freq=250, 
                          duration=5, 
                          file=ravenOut)
