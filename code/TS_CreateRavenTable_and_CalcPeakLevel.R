@@ -1,6 +1,7 @@
 # Load helper functions and pop-up dialogue library
 source('code/AMP_pkgs_funs.R')
 library(svDialogs)
+pak::pkg_install('TaikiSan21/PAMmisc')
 
 # Part 1 ArcGIS output -> Fix timestamps for Raven -> Write Raven table ####
 # Input requires ArcGIS Excel file and Wav file for those selections
