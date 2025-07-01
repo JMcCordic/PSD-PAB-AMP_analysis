@@ -14,6 +14,7 @@ tidyverse_short<-c("broom","cli","crayon","dbplyr","dplyr","dtplyr","forcats","g
 lapply(tidyverse_short, require, character.only = TRUE) 
 library(svDialogs)
 library(tcltk)
+pak::pkg_install('TaikiSan21/PAMmisc')
 
 #############################################################
 #### User-defined variables - UPDATE FOR EACH DEPLOYMENT ####
@@ -36,11 +37,8 @@ all_selns <- Compile_Raven_selns(site_id = site_id,
 
 # Save compiled selection table in outputs folder
 write.table(all_selns, 
-            paste0("outputs/", site_id,"_",dep_id,"_all_vessel_selections.txt"),
+            paste0("output/", site_id,"_",dep_id,"_all_vessel_selections.txt"),
             row.names = FALSE)
-
-
-#### Create Hourly Presence Table ####
 
 # get hours from date-times with functions from lubridate pkg
 
@@ -95,4 +93,8 @@ hourly_pres_notes <- hourly_pres |>
 #### Save Hourly Presence table into /outputs folder
 
 write.csv(hourly_pres_notes, 
-          paste0("outputs/",site_id,"_",dep_id,"_Vessel_Hourly_Presence.csv"))
+          paste0("output/",site_id,"_",dep_id,"_Vessel_Hourly_Presence.csv"))
+
+write.csv(hourly_pres, 
+          paste0("output/",site_id,"_",dep_id,"_Vessel_Hourly_Presence.csv"))
+
