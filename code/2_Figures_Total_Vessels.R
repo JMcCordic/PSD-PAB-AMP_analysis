@@ -130,7 +130,7 @@ selns_data <- selns_og |>
                Weekday = weekdays(Begin_Date_loc))) |>
   bind_rows()
 
-write.csv(selns_data, paste0("outputs/",paste0(dep_list, collapse = "_"),"_compiled_selections_data_localtz.csv" ))
+write.csv(selns_data, paste0("output/",paste0(dep_list, collapse = "_"),"_compiled_selections_data_localtz.csv" ))
 
 # Reshape data for plotting ----------------------------------------------------
 
@@ -148,7 +148,7 @@ hp_diel <- hp_data |>
                values_to = "N_ves")
 
 write.csv(hp_diel,
-          paste0("outputs/", paste0(dep_list, collapse = "_"),"_Diel_Summary_localtz.csv"))
+          paste0("output/", paste0(dep_list, collapse = "_"),"_Diel_Summary_localtz.csv"))
 
 
 #### Weekday presence ####
@@ -164,7 +164,7 @@ hp_weekday <- hp_data |>
 levels(hp_weekday$Weekday) <- c("S","M","T","W","R","F","Sa")
 
 write.csv(hp_weekday,
-          paste0("outputs/", paste0(dep_list, collapse = "_"),"_Weekday_Summary_localtz.csv"))
+          paste0("output/", paste0(dep_list, collapse = "_"),"_Weekday_Summary_localtz.csv"))
 
 
 #### Date ####
@@ -178,7 +178,7 @@ hp_bydate <- hp_data |>
                values_to = "N_ves")
 
 write.csv(hp_bydate,
-          paste0("outputs/", paste0(dep_list, collapse = "_"),"_Daily_Count_Summary_localtz.csv"))
+          paste0("output/", paste0(dep_list, collapse = "_"),"_Daily_Count_Summary_localtz.csv"))
 
 
 #### Duration ####
@@ -223,7 +223,7 @@ dur_summ_total <- selns_data |>
   
 
 write.csv(dur_summ_total,
-          paste0("outputs/", paste0(dep_list, collapse = "_"),"_Event_Duration_Summary_localtz.csv"))
+          paste0("output/", paste0(dep_list, collapse = "_"),"_Event_Duration_Summary_localtz.csv"))
 
 # summarize vessel duration by day (e.g., mean/min/max vessel hours in a 24h period by behavior)
 dur_summ_daily <- dur_total_bydate |>
@@ -234,7 +234,7 @@ dur_summ_daily <- dur_total_bydate |>
             max_dur_h = max(DeltaHours, na.rm = TRUE))
 
 write.csv(dur_summ_daily,
-          paste0("outputs/", paste0(dep_list, collapse = "_"),"_Daily_Duration_Behav_Summary_localtz.csv"))
+          paste0("output/", paste0(dep_list, collapse = "_"),"_Daily_Duration_Behav_Summary_localtz.csv"))
 
 
 # dur_summ_behav <- summaryBy(DeltaHours~Behavior+SiteID, data=Dur, FUN=c(sum,min,max,median,length))
@@ -269,7 +269,7 @@ ggplot(data=hp_diel, aes(x=Begin_Hour_loc, y = N_ves)) +
   theme(legend.position = "none")
   #guides(fill=guide_legend(title="Behavioral \nCategory"))
 
-ggsave(paste0("outputs/", paste0(dep_list, collapse = "_"),"_Diel_AWST.png"), width=8, height=8,
+ggsave(paste0("output/", paste0(dep_list, collapse = "_"),"_Diel_AWST.png"), width=8, height=8,
        units="in", dpi=300)
 
 
@@ -297,7 +297,7 @@ ggplot(data=hp_weekday, aes(x=Weekday, y = N_ves)) +
   theme(legend.position = "none")  
   #guides(fill=guide_legend(title="Behavioral \nCategory"))
 
-ggsave(paste0("outputs/", paste0(dep_list, collapse = "_"),"_Weekday_AWST.png"), width=8, height=8,
+ggsave(paste0("output/", paste0(dep_list, collapse = "_"),"_Weekday_AWST.png"), width=8, height=8,
        units="in", dpi=300)
 
 
@@ -328,7 +328,7 @@ ggplot(data=hp_bydate, aes(x=Begin_Date_loc, y = N_ves)) +
   theme(legend.position = "none") 
   #guides(fill=guide_legend(title="Behavioral \nCategory"))
 
-ggsave(paste0("outputs/", paste0(dep_list, collapse = "_"),"_Daily_AWST.png"), width=8, height=8,
+ggsave(paste0("output/", paste0(dep_list, collapse = "_"),"_Daily_AWST.png"), width=8, height=8,
        units="in", dpi=300)
 
 
@@ -357,5 +357,5 @@ ggplot(data=dur_total_bydate,
         plot.title = element_text(hjust = 0.5))+
   guides(fill=guide_legend(title="Behavioral \nCategory"))
 
-ggsave(paste0("outputs/", paste0(dep_list, collapse = "_"),"_Duration_AWST.png"), width=8, height=8,
+ggsave(paste0("output/", paste0(dep_list, collapse = "_"),"_Duration_AWST.png"), width=8, height=8,
        units="in", dpi=300)
