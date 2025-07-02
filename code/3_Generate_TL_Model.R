@@ -24,7 +24,8 @@ calib_data_og <- read_csv(tk_choose.files(caption=paste0("Select the file with c
 calib_data <- subset(calib_data_og, calib_data_og$used==1) |>
   # filter(PeakFreq > 178 & PeakFreq < 282)|>
   mutate(Distance_km = Distance/1000,
-         slant_range_m = sqrt(Distance^2 + depth_m^2))
+         slant_range_m = sqrt(Distance^2 + depth_m^2)) |>
+  dplyr::filter(slant_range_m <= 1000)
 
 # Transmission loss model -------------------------------------------------
 
@@ -54,7 +55,7 @@ tl_label <- paste0("RL = ", SL, " - ",
 
 
 ggplot(data = calib_data, 
-       aes(x = Distance, 
+       aes(x = slant_range_m, 
            y = PeakLev)) +
   geom_point(aes(color = PeakFreq)) + 
   scale_color_viridis_c()+
