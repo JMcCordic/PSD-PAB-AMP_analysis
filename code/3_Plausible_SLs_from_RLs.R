@@ -11,8 +11,24 @@ source("code/AMP_pkgs_funs.R")
 
 # #### Deployment info ####
 dep_id <- dlgInput(message = "Site name, deployment")$res
+#Calculate average distance between ST and park boundary in metrts
+
+ST_N <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to North boundary of NPZ')$res)
+ST_NE <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to Northeast boundary of NPZ')$res)
+ST_E <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to East boundary of NPZ')$res)
+ST_SE <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to Southeast boundary of NPZ')$res)
+ST_S <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to South boundary of NPZ')$res)
+ST_SW <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to Southwest boundary of NPZ')$res)
+ST_W <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to West boundary of NPZ')$res)
+ST_NW <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to Northwest boundary of NPZ')$res)
+
+park_dist <- prod(ST_N, ST_NE, ST_E, ST_SE, ST_S, ST_SW, ST_W, ST_SW)
+
+#  as.numeric(dlgInput(message = paste0("Avg meters to park boundary (whole number): ", dep_id))$res)
+
+
 # average distance between ST and park boundary
-park_dist <- as.numeric(dlgInput(message = paste0("Avg meters to park boundary (whole number): ", dep_id))$res)
+#park_dist <- as.numeric(dlgInput(message = paste0("Avg meters to park boundary (whole number): ", dep_id))$res)
 
 
 
