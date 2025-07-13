@@ -24,15 +24,16 @@ calib_data_og <- read_csv(tk_choose.files(caption=paste0("Select the file with c
 calib_data <- subset(calib_data_og, calib_data_og$used==1) |>
   # filter(PeakFreq > 178 & PeakFreq < 282)|>
   mutate(Distance_km = Distance/1000,
-         slant_range_m = sqrt(Distance^2 + depth_m^2)) |>
-  dplyr::filter(slant_range_m <= 1000)
+         slant_range_m = sqrt(Distance^2 + depth_m^2))#|>
+ #dplyr::filter(slant_range_m <= 1000)
+
 
 # Transmission loss model -------------------------------------------------
 
 # Use nonlinear least squares regression to model transmission loss function
 tl_model <- nls(PeakLev ~ SL - loss_geo*log10(slant_range_m) - loss_abs*slant_range_m, 
                 algorithm = "port",
-                upper = c(200, 30, 0.1),
+                upper = c(200,20, 0.1),
                 lower = c(0, 0, 0),
                 data = calib_data,
                 start = list(SL = 0,
@@ -71,8 +72,8 @@ ggplot(data = calib_data,
                                  ),
               fullrange = TRUE
               ) +
-  annotate("text", x = 300, y = 110, label = tl_label)+
-  labs(x = "Distance (m)", y = expression(paste("Peak Level, dB re 1", mu, "Pa")))+
+  annotate("text", x = 700, y = 110, label = tl_label)+
+  labs(x = "Distance (m)", y =expression(paste("Peak Level, dB re 1", mu, "Pa")))+
   theme_bw(base_size = 14)
 
 ggsave(ggsave(paste0("output/", dep_id,"TL_model.png"), width=8, height=8,
