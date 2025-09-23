@@ -13,16 +13,7 @@ source("code/AMP_pkgs_funs.R")
 dep_id <- dlgInput(message = "Site name, deployment")$res
 #Calculate average distance between ST and park boundary in metrts
 
-ST_N <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to North boundary of NPZ')$res)
-ST_NE <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to Northeast boundary of NPZ')$res)
-ST_E <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to East boundary of NPZ')$res)
-ST_SE <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to Southeast boundary of NPZ')$res)
-ST_S <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to South boundary of NPZ')$res)
-ST_SW <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to Southwest boundary of NPZ')$res)
-ST_W <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to West boundary of NPZ')$res)
-ST_NW <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to Northwest boundary of NPZ')$res)
-
-park_dist <- prod(ST_N, ST_NE, ST_E, ST_SE, ST_S, ST_SW, ST_W, ST_SW)
+park_dist <- as.numeric(dlg_input(message='Enter distance (meters) from soundtrap to closest boundary of NPZ')$res)
 
 #  as.numeric(dlgInput(message = paste0("Avg meters to park boundary (whole number): ", dep_id))$res)
 
@@ -61,7 +52,7 @@ median(data$PeakFreq)
 # qt_tol <- quantile(tol_data$X100, c(0.25, 0.50, 0.75))
 
 # tol output from HMD data via PAMScapes
-qt_tol <- quantile(tol_data$TOL_250, c(0.25, 0.50, 0.75), na.rm = TRUE)
+qt_tol <- quantile(tol_data$X199.526231496888, c(0.25, 0.50, 0.75), na.rm = TRUE)
 
 
 #use 50th percentile as NL
@@ -284,6 +275,11 @@ selns_data <- selns_og |>
                Site_ID = {.y}$site_id, 
                Dep = {.y}$dep_id,
                Behavior = gsub(pattern = "CPAManeuver", replacement = "Maneuver", x = Behavior),
+               Behavior = gsub(pattern = "Maneuver+TransitA", replacement = "Maneuver", x = Behavior),
+               Behavior = gsub(pattern = "Maneuver+CPA", replacement = "Maneuver", x = Behavior),
+               Behavior = gsub(pattern = "DTransit", replacement = "Transit", x = Behavior),
+               Behavior = gsub(pattern = "CTransit", replacement = "Transit", x = Behavior),
+               Behavior = gsub(pattern = "CPA", replacement = "Transit", x = Behavior),
                Behavior = gsub(pattern = " ", replacement = "", x = Behavior),
                DeltaHours = Delta_Time_s/3600,
                # Total_Vessels = rowSums(across(c(TR,M))),
